@@ -585,4 +585,87 @@ class OthelloAI:
         # best_move = self.manual_depth(board, valid_moves, maxDepth)
         return best_move
       
-            
+    
+    # def minmax(self, board, depth, maximizing_player):
+
+    #     valid_moves = self.get_valid_moves(board, maximizing_player)
+
+    #     if depth == 0 or len(valid_moves) == 0:
+    #         return self.evaluate(board)
+
+    #     if maximizing_player == self.player:
+    #         max_eval = -math.inf
+    #         for move in valid_moves:
+    #             board_copy = copy.deepcopy(board)
+    #             board_copy = self.make_move(
+    #                 board_copy, move, maximizing_player)
+    #             eval = self.minmax(board_copy, depth - 1, 3 - self.player)
+    #             max_eval = max(max_eval, eval)
+    #         return max_eval
+
+    #     else:
+    #         min_eval = math.inf
+    #         for move in valid_moves:
+    #             board_copy = copy.deepcopy(board)
+    #             board_copy = self.make_move(
+    #                 board_copy, move, maximizing_player)
+    #             eval = self.minmax(board_copy, depth - 1, self.player)
+    #             min_eval = min(min_eval, eval)
+    #         return min_eval
+
+    def minmax_alpha_beta(self, board, depth, maximizing_player, alpha=-math.inf, beta=math.inf):
+
+        valid_moves = self.get_valid_moves(board, maximizing_player)
+
+        if depth == 0 or len(valid_moves) == 0:
+            return self.evaluate(board)
+
+        if maximizing_player == self.player:
+            max_eval = -math.inf
+            for move in valid_moves:
+                board_copy = copy.deepcopy(board)
+                board_copy = self.make_move(
+                    board_copy, move, maximizing_player)
+                eval = self.minmax_alpha_beta(
+                    board_copy, depth - 1, 3 - self.player, alpha, beta)
+                max_eval = max(max_eval, eval)
+                alpha = max(alpha, eval)
+                if beta <= alpha:
+                    break
+            return max_eval
+
+        else:
+            min_eval = math.inf
+            for move in valid_moves:
+                board_copy = copy.deepcopy(board)
+                board_copy = self.make_move(
+                    board_copy, move, maximizing_player)
+                eval = self.minmax_alpha_beta(
+                    board_copy, depth - 1, self.player, alpha, beta)
+                min_eval = min(min_eval, eval)
+                beta = min(beta, eval)
+                if beta <= alpha:
+                    break
+            return min_eval
+
+    def make_move(self, board, move, player):
+        row, col = move
+        if not self.is_valid_move(row, col, board, player):
+            return False
+        board[row][col] = player
+        for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
+            r, c = row + dr, col + dc
+            if not (0 <= r < 8 and 0 <= c < 8):
+                continue
+            if board[r][c] == 3 - player:
+                while 0 <= r < 8 and 0 <= c < 8 and board[r][c] == 3 - player:
+                    r += dr
+                    c += dc
+                if 0 <= r < 8 and 0 <= c < 8 and board[r][c] == player:
+                    r, c = row + dr, col + dc
+                    while board[r][c] == 3 - player:
+                        board[r][c] = player
+                        r += dr
+                        c += dc
+        return board
+
