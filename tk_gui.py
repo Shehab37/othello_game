@@ -494,4 +494,95 @@ class OthelloGame:
             self.current_player = Bcopy[1]
             self.score1 = Bcopy[2]
             self.score2 = Bcopy[3]
+class OthelloAI:
 
+    def __init__(self, player, level=1, maxDuration=1):
+        self.player = player
+        self.level = level
+        self.maxDuration = maxDuration
+
+    def get_valid_moves(self, board, player):
+        valid_moves = []
+        for i in range(8):
+            for j in range(8):
+                if board[i][j] == 0 and self.is_valid_move(i, j, board, player):
+                    valid_moves.append((i, j))
+        return valid_moves
+
+    def is_valid_move(self, row, col, board, player):
+        if board[row][col] != 0:
+            return False
+        for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
+            r, c = row + dr, col + dc
+            if not (0 <= r < 8 and 0 <= c < 8):
+                continue
+            if board[r][c] == 3 - player:
+                while 0 <= r < 8 and 0 <= c < 8 and board[r][c] == 3 - player:
+                    r += dr
+                    c += dc
+                if 0 <= r < 8 and 0 <= c < 8 and board[r][c] == player:
+                    return True
+        return False
+
+    def get_corner_moves(self, valid_moves):
+        corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+        for corner in corners:
+            if corner in valid_moves:
+                return corner
+        return None
+
+    def get_move_by_level(self, board, valid_moves, depth):
+        max_eval = -math.inf
+        best_move = None
+        for move in valid_moves:
+            board_copy = copy.deepcopy(board)
+            board_copy = self.make_move(board_copy, move, self.player)
+            # eval = self.minmax(board_copy, depth, 3 - self.player)
+            eval = self.minmax_alpha_beta(
+                board_copy, depth, 3 - self.player, -math.inf, math.inf)
+            if eval > max_eval:
+                max_eval = eval
+                best_move = move
+        return best_move
+
+    def iterative_deepening(self, board, valid_moves, maxDepth):
+        maxDuration = self.maxDuration
+        for depth in range(1, maxDepth + 1, 1):
+            startitr = time.time()
+            best_move = self.get_move_by_level(board, valid_moves, depth)
+            duration = time.time() - startitr
+            maxDuration -= duration
+            if maxDuration < 2 * duration:
+                break
+        return best_move
+
+    # def manual_depth(self, board, valid_moves, maxDepth):
+    #     if maxDepth <= 4:
+    #         depth = maxDepth    # approx. time is   0.007,  0.023,  0.087,  0.316 seconds
+    #         # for depth            1 ,     2 ,     3 ,     4   respectively
+    #     else:
+    #         maxDuration = self.maxDuration
+    #         if maxDuration <= 1:
+    #             depth = 4       # approx. time is 0.316 seconds
+    #         elif maxDuration <= 4:
+    #             depth = 5       # approx. time is 1.120 seconds
+    #         elif maxDuration <= 10:
+    #             depth = 6       # approx. time is 4.464 seconds
+    #         else:
+    #             depth = 7       # approx. time is 12.40 seconds
+
+    #     best_move = self.get_move_by_level(board, valid_moves, depth)
+    #     return best_move
+
+    def get_move(self, board):
+        valid_moves = self.get_valid_moves(board, self.player)
+        corner_move = self.get_corner_moves(valid_moves)
+        if corner_move:
+            return corner_move
+
+        maxDepth = max(self.level // 2, 1)
+        best_move = self.iterative_deepening(board, valid_moves, maxDepth)
+        # best_move = self.manual_depth(board, valid_moves, maxDepth)
+        return best_move
+      
+            
