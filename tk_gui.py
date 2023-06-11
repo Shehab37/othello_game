@@ -249,3 +249,167 @@ class OthelloGUI:
         self.ai_level_input.config(state="normal")
         self.maxDuration_label.config(state="normal")
         self.maxDuration_input.config(state="normal")
+
+        
+    def human_move(self, event):
+        col = event.x // 75
+        row = event.y // 75
+        if self.game.make_move(row, col):
+            winsound.PlaySound("piece_move.wav", winsound.SND_ASYNC)
+
+            self.update_scores()  # update player scores
+
+            self.draw_board()
+            self.check_game_over()  # check if game is over
+            self.highlight_valid_squares()  # highlight valid squares after each move
+            self.highlight_latest_move(row, col)  # highlight latest move
+            self.storeGame()
+
+            if self.game_mode.get() == "human_vs_ai" and self.game.current_player == self.ai_player.get():
+                # Schedule AI move after a delay
+                self.master.after(700, self.ai_move)
+        else:
+            # do not delete faded squares if move is invalid
+            pass
+
+    def ai_move(self):
+
+        board = self.game.board.copy()
+
+        if self.game_mode.get() == "human_vs_ai":
+            if self.ai_player.get() == 1:
+                move = self.ai_player_white.get_move(board)
+            elif self.ai_player.get() == 2:
+                move = self.ai_player_black.get_move(board)
+
+        elif self.game_mode.get() == "ai_vs_ai":
+            if self.game.current_player == 1:
+                move = self.ai_player_white.get_move(board)
+            elif self.game.current_player == 2:
+                move = self.ai_player_black.get_move(board)
+
+        row, col = move
+
+        if self.game.make_move(row, col):
+            winsound.PlaySound("piece_move.wav", winsound.SND_ASYNC)
+
+            self.update_scores()  # update player scores
+
+            self.draw_board()
+            self.check_game_over()  # check if game is over
+            self.highlight_valid_squares()  # highlight valid squares after each move
+            self.highlight_latest_move(row, col)  # highlight latest move
+            self.storeGame()
+        else:
+            # do not delete faded squares if move is invalid
+            pass
+
+    def on_click(self, event):
+
+        if self.game_mode.get() == "human_vs_human":
+            self.human_move(event)
+
+        elif self.game_mode.get() == "human_vs_ai":
+
+            if self.game.current_player == self.ai_player.get():
+                self.ai_move()
+            else:
+                self.human_move(event)
+
+        elif self.game_mode.get() == "ai_vs_ai":
+            self.ai_move()
+
+    def check_game_over(self):
+        if self.game.is_game_over():
+            self.end_game()
+
+    def end_game(self):
+        winner = self.game.get_winner()
+        if winner == 1:
+            messagebox.showinfo("Game Over", "White wins!")
+        elif winner == 2:
+            messagebox.showinfo("Game Over", "Black wins!")
+        else:
+            messagebox.showinfo("Game Over", "Tie game!")
+
+    def highlight_mouse_hover(self, event):
+        self.canvas.delete("mouse_square")
+        col = event.x // 75
+        row = event.y // 75
+        x1, y1 = col * 75 + 10, row * 75 + 10
+        x2, y2 = (col + 1) * 75 - 10, (row + 1) * 75 - 10
+        if self.game.current_player == 2:
+            outline_color = "#000000"  # black if black to move
+        else:
+            outline_color = "#FFFFFF"  # white if white to move
+        self.canvas.create_oval(
+            x1, y1, x2, y2, fill=outline_color, outline=outline_color, tags="mouse_square")
+
+    def highlight_valid_squares(self):
+        valid_moves = self.game.get_valid_moves()
+        self.canvas.delete("valid_square")
+        for move in valid_moves:
+            row, col = move
+            x1, y1 = col * 75 + 10, row * 75 + 10
+            x2, y2 = (col + 1) * 75 - 10, (row + 1) * 75 - 10
+            if self.game.current_player == 2:
+                outline_color = "#000000"  # black if black to move
+            else:
+                outline_color = "#FFFFFF"  # white if white to move
+            self.canvas.create_oval(
+                x1, y1, x2, y2, fill="", outline=outline_color, tags="valid_square")
+
+    def highlight_latest_move(self, row, col):
+        x, y = col * 75 + 37, row * 75 + 37
+        radius = 12
+        fill_color = "#808080"  # blend of black and white
+        self.canvas.create_oval(
+            x - radius, y - radius, x + radius, y + radius,
+            fill=fill_color, outline="#000000", tags="latest_move")
+
+    def update_scores(self):
+        self.game.update_scores()
+        self.score_label1.config(text=f"Black: {self.game.score2}")
+        self.score_label2.config(text=f"White: {self.game.score1}")
+        if self.game.current_player == 1:
+            self.current_player_label.config(text="Current Player: White")
+        else:
+            self.current_player_label.config(text="Current Player: Black")
+
+    def restart_game(self):
+
+        if self.game:
+            del self.game
+        self.game = OthelloGame()
+
+        # update player scores and current player label
+        self.score_label1.config(text=f"Black: {self.game.score1}")
+        self.score_label2.config(text=f"White: {self.game.score2}")
+        if self.game.current_player == 1:
+            self.current_player_label.config(text="Current Player: White")
+        else:
+            self.current_player_label.config(text="Current Player: Black")
+
+        # resize canvas and draw board
+        # self.canvas.config(width=400, height=400)
+        self.draw_board()
+
+        # unbind click event
+        self.canvas.unbind("<Button-1>")
+
+        # enable game mode selection
+        self.enable_game_mode_selection()
+
+        self.start_button.config(text="Start Game", command=self.start_game)
+
+        # self.start_game()
+
+
+class OthelloGame:
+    def __init__(self):
+        self.board = [[0] * 8 for _ in range(8)]
+        self.board[3][3] = self.board[4][4] = 1
+        self.board[3][4] = self.board[4][3] = 2
+        self.current_player = 2
+        self.score1 = 2
+        self.score2 = 2
