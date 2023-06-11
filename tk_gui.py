@@ -159,3 +159,93 @@ class OthelloGUI:
             self.update_scores()  # update player scores
             self.draw_board()  # draw the board
             self.highlight_valid_squares()  # highlight valid squares after each move
+
+    def draw_board(self):
+        self.canvas.delete("piece")
+        if self.game:
+            for i in range(8):
+                for j in range(8):
+                    x1, y1 = j * 75, i * 75
+                    x2, y2 = (j + 1) * 75, (i + 1) * 75
+                    if (i+j) % 2 == 0:
+                        self.canvas.create_rectangle(
+                            x1, y1, x2, y2, fill="#00810e", outline="")
+                    else:
+                        self.canvas.create_rectangle(
+                            x1, y1, x2, y2, fill="#009e12", outline="")
+                    if self.game.board[i][j] == 1:
+                        self.canvas.create_oval(
+                            x1 + 5, y1 + 5, x2 - 5, y2 - 5, fill="white", tags="piece")
+                    elif self.game.board[i][j] == 2:
+                        self.canvas.create_oval(
+                            x1 + 5, y1 + 5, x2 - 5, y2 - 5, fill="black", tags="piece")
+
+    def start_game(self):
+        if self.game:
+            del self.game
+        self.game = OthelloGame()
+
+        # create ai players
+        if self.game_mode.get() != "human_vs_human":
+            self.level = int(self.ai_level_input.get())
+            self.maxDuartion = float(self.maxDuration_input.get())
+            self.ai_player_white = OthelloAI(1, self.level, self.maxDuartion)
+            self.ai_player_black = OthelloAI(2, self.level, self.maxDuartion)
+
+        # update player scores and current player label
+        self.score_label1.config(text=f"Black: {self.game.score1}")
+        self.score_label2.config(text=f"White: {self.game.score2}")
+        if self.game.current_player == 1:
+            self.current_player_label.config(text="Current Player: White")
+        else:
+            self.current_player_label.config(text="Current Player: Black")
+
+        # resize canvas and draw board
+        # self.canvas.config(width=400, height=400)
+        self.draw_board()
+
+        self.highlight_valid_squares()  # highlight valid squares in the first move
+        self.canvas.bind("<Button-1>", self.on_click)
+        self.canvas.bind("<Motion>", self.on_motion)
+
+        # change button text to "Restart"
+        self.start_button.config(text="Restart", command=self.restart_game)
+
+        # disable game mode selection
+        self.disable_game_mode_selection()
+
+        winsound.PlaySound("sounds/board_start.wav", winsound.SND_ASYNC)
+#
+        self.gameStack = []
+        self.storeGame()
+
+    def on_motion(self, event):
+
+        if self.game_mode.get() == "ai_vs_ai":
+            return
+        if self.game_mode.get() == "human_vs_ai" and self.game.current_player == self.ai_player.get():
+            return
+
+        self.highlight_mouse_hover(event)
+
+    def disable_game_mode_selection(self):
+        self.human_vs_human_button.config(state="disabled")
+        self.human_vs_ai_button.config(state="disabled")
+        self.ai_vs_ai_button.config(state="disabled")
+        self.ai_as_white_button.config(state="disabled")
+        self.ai_as_black_button.config(state="disabled")
+        self.ai_level_label.config(state="disabled")
+        self.ai_level_input.config(state="disabled")
+        self.maxDuration_label.config(state="disabled")
+        self.maxDuration_input.config(state="disabled")
+
+    def enable_game_mode_selection(self):
+        self.human_vs_human_button.config(state="normal")
+        self.human_vs_ai_button.config(state="normal")
+        self.ai_vs_ai_button.config(state="normal")
+        self.ai_as_white_button.config(state="normal")
+        self.ai_as_black_button.config(state="normal")
+        self.ai_level_label.config(state="normal")
+        self.ai_level_input.config(state="normal")
+        self.maxDuration_label.config(state="normal")
+        self.maxDuration_input.config(state="normal")
