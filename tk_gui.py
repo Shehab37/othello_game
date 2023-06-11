@@ -250,12 +250,11 @@ class OthelloGUI:
         self.maxDuration_label.config(state="normal")
         self.maxDuration_input.config(state="normal")
 
-        
     def human_move(self, event):
         col = event.x // 75
         row = event.y // 75
         if self.game.make_move(row, col):
-            winsound.PlaySound("piece_move.wav", winsound.SND_ASYNC)
+            winsound.PlaySound("sounds/piece_move.wav", winsound.SND_ASYNC)
 
             self.update_scores()  # update player scores
 
@@ -267,13 +266,15 @@ class OthelloGUI:
 
             if self.game_mode.get() == "human_vs_ai" and self.game.current_player == self.ai_player.get():
                 # Schedule AI move after a delay
-                self.master.after(700, self.ai_move)
+                self.master.after(20, self.ai_move)
+                # self.ai_move()
         else:
             # do not delete faded squares if move is invalid
             pass
 
     def ai_move(self):
 
+        start = time.time()
         board = self.game.board.copy()
 
         if self.game_mode.get() == "human_vs_ai":
@@ -288,10 +289,15 @@ class OthelloGUI:
             elif self.game.current_player == 2:
                 move = self.ai_player_black.get_move(board)
 
+        dur = int((time.time() - start) * 1000)
+        if dur < 400:
+            # delay AI move if it is too fast
+            self.master.after(400 - dur)
+
         row, col = move
 
         if self.game.make_move(row, col):
-            winsound.PlaySound("piece_move.wav", winsound.SND_ASYNC)
+            winsound.PlaySound("sounds/piece_move.wav", winsound.SND_ASYNC)
 
             self.update_scores()  # update player scores
 
@@ -402,8 +408,10 @@ class OthelloGUI:
 
         self.start_button.config(text="Start Game", command=self.start_game)
 
+        # select the last selected game mode
+        # self.game_mode.set(self.game_mode.get())
+        self.select_game_mode(self.game_mode.get())
         # self.start_game()
-
 
 class OthelloGame:
     def __init__(self):
