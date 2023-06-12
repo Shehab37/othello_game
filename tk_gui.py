@@ -669,17 +669,17 @@ class OthelloAI:
                         r += dr
                         c += dc
         return board
-def evaluate(self, board):
+    def evaluate(self, board):
 
-        coin_parity = self.evaluate_coin_parity(board)
-        mobility = self.evaluate_mobility(board)
-        corners = self.evaluate_corners(board)
-        stability = self.evaluate_stability(board)
+            coin_parity = self.evaluate_coin_parity(board)
+            mobility = self.evaluate_mobility(board)
+            corners = self.evaluate_corners(board)
+            stability = self.evaluate_stability(board)
 
-        eval = coin_parity + (self.level > 2) * mobility + \
-            (self.level > 3) * corners + (self.level > 4) * stability
+            eval = coin_parity + (self.level > 2) * mobility + \
+                (self.level > 3) * corners + (self.level > 4) * stability
 
-        return eval
+            return eval
 
     def evaluate_coin_parity(self, board):
 
