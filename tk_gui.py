@@ -422,78 +422,79 @@ class OthelloGame:
         self.score1 = 2
         self.score2 = 2
 
-        def get_valid_moves(self):
-            valid_moves = []
-            for i in range(8):
-                for j in range(8):
-                    if self.board[i][j] == 0 and self.is_valid_move(i, j):
-                        valid_moves.append((i, j))
-            return valid_moves
+    def get_valid_moves(self):
+        valid_moves = []
+        for i in range(8):
+            for j in range(8):
+                if self.board[i][j] == 0 and self.is_valid_move(i, j):
+                    valid_moves.append((i, j))
+        return valid_moves
 
-        def is_valid_move(self, row, col):
-            if self.board[row][col] != 0:
-                return False
-            for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
-                r, c = row + dr, col + dc
-                if not (0 <= r < 8 and 0 <= c < 8):
-                    continue
-                if self.board[r][c] == 3 - self.current_player:
-                    while 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == 3 - self.current_player:
-                        r += dr
-                        c += dc
-                    if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == self.current_player:
-                        return True
+    def is_valid_move(self, row, col):
+        if self.board[row][col] != 0:
             return False
+        for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
+            r, c = row + dr, col + dc
+            if not (0 <= r < 8 and 0 <= c < 8):
+                continue
+            if self.board[r][c] == 3 - self.current_player:
+                while 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == 3 - self.current_player:
+                    r += dr
+                    c += dc
+                if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == self.current_player:
+                    return True
+        return False
 
-        def make_move(self, row, col):
-            if not self.is_valid_move(row, col):
-                return False
-            self.board[row][col] = self.current_player
-            for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
-                r, c = row + dr, col + dc
-                if not (0 <= r < 8 and 0 <= c < 8):
-                    continue
-                if self.board[r][c] == 3 - self.current_player:
-                    while 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == 3 - self.current_player:
+    def make_move(self, row, col):
+        if not self.is_valid_move(row, col):
+            return False
+        self.board[row][col] = self.current_player
+        for dr, dc in [(0, 1), (1, 0), (0, -1), (-1, 0), (1, 1), (1, -1), (-1, 1), (-1, -1)]:
+            r, c = row + dr, col + dc
+            if not (0 <= r < 8 and 0 <= c < 8):
+                continue
+            if self.board[r][c] == 3 - self.current_player:
+                while 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == 3 - self.current_player:
+                    r += dr
+                    c += dc
+                if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == self.current_player:
+                    r, c = row + dr, col + dc
+                    while self.board[r][c] == 3 - self.current_player:
+                        self.board[r][c] = self.current_player
                         r += dr
                         c += dc
-                    if 0 <= r < 8 and 0 <= c < 8 and self.board[r][c] == self.current_player:
-                        r, c = row + dr, col + dc
-                        while self.board[r][c] == 3 - self.current_player:
-                            self.board[r][c] = self.current_player
-                            r += dr
-                            c += dc
-            self.current_player = 3 - self.current_player
-            self.update_scores()
-            return True
+        self.current_player = 3 - self.current_player
+        self.update_scores()
+        return True
 
-        def update_scores(self):
-            self.score1 = sum(row.count(1) for row in self.board)
-            self.score2 = sum(row.count(2) for row in self.board)
+    def update_scores(self):
+        self.score1 = sum(row.count(1) for row in self.board)
+        self.score2 = sum(row.count(2) for row in self.board)
 
-        def is_game_over(self):
-            return not self.get_valid_moves()
+    def is_game_over(self):
+        return not self.get_valid_moves()
 
-        def get_winner(self):
-            if self.score1 > self.score2:
-                return 1
-            elif self.score2 > self.score1:
-                return 2
-            else:
-                return 0
+    def get_winner(self):
+        if self.score1 > self.score2:
+            return 1
+        elif self.score2 > self.score1:
+            return 2
+        else:
+            return 0
 
-        def get_Bcopy(self):
-            Bcopy = [self.board,
-                    self.current_player,
-                    self.score1,
-                    self.score2]
-            return copy.deepcopy(Bcopy)
+    def get_Bcopy(self):
+        Bcopy = [self.board,
+                self.current_player,
+                self.score1,
+                self.score2]
+        return copy.deepcopy(Bcopy)
 
-        def set_Bcopy(self, Bcopy):
-            self.board = Bcopy[0]
-            self.current_player = Bcopy[1]
-            self.score1 = Bcopy[2]
-            self.score2 = Bcopy[3]
+    def set_Bcopy(self, Bcopy):
+        self.board = Bcopy[0]
+        self.current_player = Bcopy[1]
+        self.score1 = Bcopy[2]
+        self.score2 = Bcopy[3]
+        
 class OthelloAI:
 
     def __init__(self, player, level=1, maxDuration=1):
