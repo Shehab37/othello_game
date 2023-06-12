@@ -577,7 +577,7 @@ class OthelloAI:
     def get_move(self, board):
         valid_moves = self.get_valid_moves(board, self.player)
         corner_move = self.get_corner_moves(valid_moves)
-        if corner_move:
+        if corner_move and self.level > 3:
             return corner_move
 
         maxDepth = max(self.level // 2, 1) if self.level <= 5 else self.level - 3
