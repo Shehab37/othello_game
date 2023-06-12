@@ -49,7 +49,7 @@ class OthelloGUI:
         self.ai_level_label = tk.Label(
             self.controls_frame, text="AI Player level:", width=15, height=2)
         self.ai_level_input = tk.Scale(
-            self.controls_frame, from_=1, to=16, orient="horizontal", length=200)
+            self.controls_frame, from_=1, to=11, orient="horizontal", length=200)
 
         self.maxDuration_label = tk.Label(
             self.controls_frame, text="AI time limit", width=20, height=2)
@@ -580,7 +580,7 @@ class OthelloAI:
         if corner_move:
             return corner_move
 
-        maxDepth = max(self.level // 2, 1)
+        maxDepth = max(self.level // 2, 1) if self.level <= 5 else self.level - 3
         best_move = self.iterative_deepening(board, valid_moves, maxDepth)
         # best_move = self.manual_depth(board, valid_moves, maxDepth)
         return best_move
