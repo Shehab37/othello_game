@@ -1,5 +1,7 @@
 # Othello Game
-![image](https://github.com/Shehab37/othello_game/assets/20583611/d36ae00e-c7e2-49dc-8903-b0684863ca7c)
+
+![image](https://github.com/Shehab37/othello_game/assets/20583611/46f4f486-5f81-4389-a344-c5e449a7c63a)
+
 
 This is a Python implementation of the classic Othello game. The game features a graphical user interface (GUI) built using the Tkinter library.
 
