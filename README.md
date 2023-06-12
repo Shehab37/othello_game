@@ -3,9 +3,14 @@
 
 This is a Python implementation of the classic Othello game. The game features a graphical user interface (GUI) built using the Tkinter library.
 
+## link to game exe :
+
+        https://drive.google.com/file/d/14GVPeLhiFdceKrFRul18ZRlz9KHaX0h9/view?usp=drive_link
+
 
 To run the game, navigate to the directory where the game code is located and run the following command:
-    python tk_gui.py
+
+        python tk_gui.py
 
 This will launch the game GUI.
 
