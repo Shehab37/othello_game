@@ -668,4 +668,61 @@ class OthelloAI:
                         r += dr
                         c += dc
         return board
+def evaluate(self, board):
 
+        coin_parity = self.evaluate_coin_parity(board)
+        mobility = self.evaluate_mobility(board)
+        corners = self.evaluate_corners(board)
+        stability = self.evaluate_stability(board)
+
+        eval = coin_parity + (self.level > 2) * mobility + \
+            (self.level > 3) * corners + (self.level > 4) * stability
+
+        return eval
+
+    def evaluate_coin_parity(self, board):
+
+        score1 = sum(row.count(1) for row in board)
+        score2 = sum(row.count(2) for row in board)
+        if self.player == 1:
+            return score1 - score2
+        else:
+            return score2 - score1
+
+    def evaluate_mobility(self, board):
+        return len(self.get_valid_moves(board, self.player)) - len(self.get_valid_moves(board, 3 - self.player))
+
+    def evaluate_corners(self, board):
+        corners = [(0, 0), (0, 7), (7, 0), (7, 7)]
+        score = 0
+        for corner in corners:
+            if board[corner[0]][corner[1]] == self.player:
+                score += 1
+            elif board[corner[0]][corner[1]] == 3 - self.player:
+                score -= 1
+        return score * 25
+
+    def evaluate_stability(self, board):
+        utlMatrix = np.array([[4, -3, 2, 2, 2, 2, -3, 4],
+                              [-3, -4, -1, -1, -1, -1, -4, -3],
+                              [2, -1, 1, 0, 0, 1, -1, 2],
+                              [2, -1, 0, 1, 1, 0, -1, 2],
+                              [2, -1, 0, 1, 1, 0, -1, 2],
+                              [2, -1, 1, 0, 0, 1, -1, 2],
+                              [-3, -4, -1, -1, -1, -1, -4, -3],
+                              [4, -3, 2, 2, 2, 2, -3, 4]])
+        maxmat = np.array(board) == self.player
+        minmat = np.array(board) == 3 - self.player
+        maxscore = np.sum(utlMatrix * maxmat)
+        minscore = np.sum(utlMatrix * minmat)
+        return maxscore - minscore
+
+
+def main():
+    root = tk.Tk()
+    gui = OthelloGUI(root)
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
